@@ -9,8 +9,10 @@ import 'virtual:svg-icons-register'
 import gloablComponent from '@/components'
 import '@/styles/index.scss'
 import router from './router'
+import pinia from './store'
 const app = createApp(App)
 app.use(ElementPlus)
+app.use(pinia)
 app.use(ElementPlus, {
   locale: zhCn,
 })
