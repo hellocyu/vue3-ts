@@ -3,7 +3,19 @@
     <!-- 左侧菜单 -->
     <div class="layout_slider">
       <Logo></Logo>
-      39
+      <!-- 展示菜单 -->
+      <el-scrollbar class="scrollbar">
+        <el-menu background-color="#001529" text-color="white">
+          <el-menu-item index="1">首页</el-menu-item>
+          <el-menu-item index="2">数据大屏</el-menu-item>
+          <el-sub-menu index="3">
+            <template #title><span>权限管理</span></template>
+            <el-menu-item index="3-1">用户管理</el-menu-item>
+            <el-menu-item index="3-2">角色管理</el-menu-item>
+            <el-menu-item index="3-3">菜单管理</el-menu-item>
+          </el-sub-menu>
+        </el-menu>
+      </el-scrollbar>
     </div>
     <!-- 顶部导航 -->
     <div class="layout_tabbar">2</div>
@@ -24,6 +36,9 @@ import Logo from './logo/index.vue'
     width: $base-menu-width;
     height: 100vh;
     background-color: $base-menu-background;
+    .scrollbar {
+      height: calc(100vh - $base-menu-logo-height);
+    }
   }
   .layout_tabbar {
     position: fixed;
