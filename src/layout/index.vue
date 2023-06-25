@@ -5,16 +5,22 @@
       <Logo></Logo>
       <!-- 展示菜单 -->
       <el-scrollbar class="scrollbar">
-        <el-menu background-color="#001529" text-color="white">
+        <el-menu
+          :default-active="$route.path"
+          background-color="#001529"
+          text-color="white"
+        >
           <Menu :menuList="userStore.menuRoutes"></Menu>
         </el-menu>
       </el-scrollbar>
     </div>
     <!-- 顶部导航 -->
-    <div class="layout_tabbar">2</div>
+    <div class="layout_tabbar">
+      <Tabbar></Tabbar>
+    </div>
     <!-- 内容区 -->
     <div class="layout_main">
-      <router-view></router-view>
+      <Main></Main>
     </div>
   </div>
 </template>
@@ -23,7 +29,11 @@
 import Logo from './logo/index.vue'
 import Menu from './menu/index.vue'
 import useUserStore from '@/store/modules/user'
+import Main from './main/index.vue'
+import Tabbar from './tabbar/index.vue'
+import { useRoute } from 'vue-router'
 let userStore = useUserStore()
+let $route = useRoute()
 </script>
 
 <style scoped lang="scss">
@@ -47,7 +57,6 @@ let userStore = useUserStore()
     left: $base-menu-width;
     width: calc(100% - $base-menu-width);
     height: $base-tabbar-height;
-    background-color: pink;
   }
   .layout_main {
     position: absolute;

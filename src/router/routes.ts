@@ -34,7 +34,7 @@ export const constantRoute = [
   },
   {
     path: '/screen',
-    componet: () => import('@/views/screen/index.vue'),
+    component: () => import('@/views/screen/index.vue'),
     name: 'Screen',
     meta: {
       hidden: false,
@@ -44,7 +44,7 @@ export const constantRoute = [
   },
   {
     path: '/acl',
-    componet: () => import('@/layout/index.vue'),
+    component: () => import('@/layout/index.vue'),
     name: 'Acl',
     meta: {
       hidden: false,
@@ -78,7 +78,7 @@ export const constantRoute = [
         name: 'Permission',
         meta: {
           hidden: false,
-          title: '权限管理',
+          title: '菜单管理',
           icon: 'Monitor',
         },
       },
@@ -86,7 +86,7 @@ export const constantRoute = [
   },
   {
     path: '/product',
-    componet: () => import('@/layout/index.vue'),
+    component: () => import('@/layout/index.vue'),
     name: 'Product',
     meta: {
       hidden: false,
