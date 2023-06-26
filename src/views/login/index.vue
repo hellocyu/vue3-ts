@@ -45,12 +45,13 @@
 <script setup lang="ts">
 import { User, Lock } from '@element-plus/icons-vue'
 import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElNotification } from 'element-plus'
 import { getTime } from '@/utils/time'
 import useUserStore from '@/store/modules/user'
 let useStore = useUserStore()
 let $router = useRouter()
+let $route = useRoute()
 let loading = ref(false)
 //收集账号与密码数据
 let loginForm = reactive({
@@ -97,11 +98,13 @@ const login = async () => {
   //请求失败-弹出失败信息
   try {
     await useStore.userLogin(loginForm)
+    //判断登录的时候是否有query参数
+    let redirect: any = $route.query.redirect
+    $router.push({ path: redirect || '/' })
     //编程式导航跳转首页
-    $router.push('/')
     ElNotification({
       type: 'success',
-      message: '登录成功',
+      message: '欢迎回来',
       title: `Hi,${getTime()}好`,
     })
     loading.value = false
