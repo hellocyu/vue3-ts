@@ -1,10 +1,7 @@
 <template>
   <div class="layout_container">
     <!-- 左侧菜单 -->
-    <div
-      class="layout_slider"
-      :class="{ fold: LayoutSettingStore.fold ? true : false }"
-    >
+    <div class="layout_slider">
       <Logo :collapse="LayoutSettingStore.fold ? true : false"></Logo>
       <!-- 展示菜单 -->
       <el-scrollbar class="scrollbar">
@@ -68,9 +65,6 @@ export default {
         border-right: none;
       }
     }
-    &.fold {
-      width: $base-menu-min-width;
-    }
   }
   .layout_tabbar {
     position: fixed;
@@ -90,7 +84,6 @@ export default {
     top: $base-tabbar-height;
     width: calc(100% - $base-menu-width);
     height: calc(100vh - $base-tabbar-height);
-    background-color: skyblue;
     padding: 20px;
     overflow: auto;
     transition: all 0.3s;

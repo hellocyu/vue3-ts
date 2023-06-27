@@ -26,7 +26,7 @@
     </span>
     <template #dropdown>
       <el-dropdown-menu>
-        <el-dropdown-item @click="logOut">退出登录50</el-dropdown-item>
+        <el-dropdown-item @click="logOut">退出登录</el-dropdown-item>
       </el-dropdown-menu>
     </template>
   </el-dropdown>
@@ -52,11 +52,11 @@ const fullScreen = () => {
     document.exitFullscreen()
   }
 }
-const logOut = () => {
+const logOut = async () => {
   //第一件事：需要向服务器发请求退出登录
   //第二件事：仓库中关于用户数据情况(token userName avatar)
   //第三件事：跳转登录页面
-  userStore.userLogout()
+  await userStore.userLogout()
   $router.push({ path: '/login', query: { redirect: $route.path } })
 }
 </script>

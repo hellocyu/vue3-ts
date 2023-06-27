@@ -1,7 +1,7 @@
 //创建用户相关的小仓库
 import { defineStore } from 'pinia'
-import { reqLogin, reqUserInfo } from '@/api/user'
-import type { loginForm, loginResponseData } from '@/api/user/type'
+import { reqLogin, reqUserInfo, reqLogout } from '@/api/user'
+import { loginForm, loginResponseData, userResponseData } from '@/api/user/type'
 import type { UserState } from './types/type'
 import { SET_TOKEN, GET_TOKEN, REMOVE_TOKEN } from '@/utils/token'
 import { constantRoute } from '@/router/routes'
@@ -20,28 +20,37 @@ const useUserStore = defineStore('User', {
       const result: loginResponseData = await reqLogin(data)
       if (result.code === 200) {
         //由于pinia/vuex存储数据其实利用js对象（非持久化）
-        this.token = result.data.token as string
+        this.token = result.data as string
         //本地存储持久化存储一份
-        SET_TOKEN(result.data.token as string)
+        SET_TOKEN(result.data as string)
         return 'ok'
       } else {
-        return Promise.reject(new Error(result.data.message))
+        return Promise.reject(new Error(result.data))
       }
     },
     //获取用户信息
     async userInfo() {
-      const result = await reqUserInfo()
+      const result: userResponseData = await reqUserInfo()
       if (result.code === 200) {
-        this.userName = result.data.checkUser.username
-        this.avatar = result.data.checkUser.avatar
+        this.userName = result.data.name
+        this.avatar = result.data.avatar
+        return 'ok'
+      } else {
+        return Promise.reject(new Error(result.message))
       }
     },
     //退出登录
-    userLogout() {
-      this.token = ''
-      this.userName = ''
-      this.avatar = ''
-      REMOVE_TOKEN()
+    async userLogout() {
+      const result: any = await reqLogout()
+      if (result.code === 200) {
+        this.token = ''
+        this.userName = ''
+        this.avatar = ''
+        REMOVE_TOKEN()
+        return 'ok'
+      } else {
+        return Promise.reject(new Error(result.message))
+      }
     },
   },
   getters: {},
