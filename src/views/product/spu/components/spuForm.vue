@@ -44,17 +44,30 @@
       </el-dialog>
     </el-form-item>
     <el-form-item label="SPU销售属性">
-      <el-select>
-        <el-option label="华为"></el-option>
-        <el-option label="oppo"></el-option>
+      <el-select
+        v-model="saleAttrAndValueName"
+        :placeholder="
+          unSelectSaleAttr.length
+            ? `还未选择${unSelectSaleAttr.length}个属性`
+            : '暂无属性选择'
+        "
+      >
+        <el-option
+          v-for="item in unSelectSaleAttr"
+          :key="item.id"
+          :label="item.name"
+          :value="`${item.id}:${item.name}`"
+        ></el-option>
       </el-select>
       <el-button
+        :disabled="saleAttrAndValueName ? false : true"
+        @click="addSaleAttr"
         type="primary"
         size="default"
         icon="Plus"
         style="margin-left: 10px"
       >
-        添加属性值
+        添加属性
       </el-button>
       <el-table border style="margin: 10px 0" :data="saleAttrList">
         <el-table-column
@@ -71,7 +84,8 @@
         <el-table-column label="销售属性值">
           <template #="{ row, $index }">
             <el-tag
-              v-for="item in row.spuSaleAttrValueList"
+              v-for="(item, index) in row.spuSaleAttrValueList"
+              @close="row.spuSaleAttrValueList.splice(index, 1)"
               :key="item.id"
               class="mx-1"
               closable
@@ -79,10 +93,24 @@
             >
               {{ item.saleAttrValueName }}
             </el-tag>
-            <el-button type="primary" size="small" icon="Plus"></el-button>
+            <el-input
+              v-if="row.flag"
+              @blur="toLook(row)"
+              v-model="row.saleAttrValue"
+              placeholder="请输入属性值"
+              size="small"
+              style="width: 100px"
+            ></el-input>
+            <el-button
+              v-else
+              @click="toEdit(row)"
+              type="primary"
+              size="small"
+              icon="Plus"
+            ></el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作86" width="120px">
+        <el-table-column label="操作" width="120px">
           <template #="{ row, $index }">
             <el-button
               type="primary"
@@ -95,7 +123,14 @@
       </el-table>
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" size="default">保存</el-button>
+      <el-button
+        type="primary"
+        size="default"
+        @click="save"
+        :disabled="saleAttrList.length > 0 ? false : true"
+      >
+        保存
+      </el-button>
       <el-button type="primary" size="default" @click="cancel">取消</el-button>
     </el-form-item>
   </el-form>
@@ -112,14 +147,16 @@ import {
   SpuImage,
   saleAttr,
   HasSaleAttr,
+  SaleAttrValue,
 } from '@/api/product/spu/type'
 import {
   reqAllTradeMark,
   reqSpIamgeList,
   reqSpuHasSaleAttr,
   reqAllSaleAttr,
+  reqAddOrUpdateSpu,
 } from '@/api/product/spu/index'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 let $emit = defineEmits(['changeScene'])
 let AllTradeMarkList = ref<Trademark[]>([])
@@ -136,8 +173,10 @@ let SpuParams = ref<SpuData>({
 })
 let dialogVisible = ref<boolean>(false)
 let dialogImageUrl = ref<string>('')
+//收集将来还未选择的销售属性ID和属性值的名字
+let saleAttrAndValueName = ref<string>('')
 const cancel = () => {
-  $emit('changeScene', 0)
+  $emit('changeScene', { flag: 0, params: 'update' })
 }
 const initHasSpuData = async (spu: SpuData) => {
   SpuParams.value = spu
@@ -186,7 +225,106 @@ const handleUpload = (file: any) => {
     return false
   }
 }
-defineExpose({ initHasSpuData })
+let unSelectSaleAttr = computed(() => {
+  let unSelect = allSaleAttr.value.filter((item) => {
+    return saleAttrList.value.every((item1) => {
+      return item.name !== item1.saleAttrName
+    })
+  })
+  return unSelect
+})
+const addSaleAttr = () => {
+  const [baseSaleAttrId, saleAttrName] = saleAttrAndValueName.value.split(':')
+  let newSaleAttr: saleAttr = {
+    baseSaleAttrId,
+    saleAttrName,
+    spuSaleAttrValueList: [],
+  }
+  saleAttrList.value.push(newSaleAttr)
+  saleAttrAndValueName.value = ''
+}
+const toEdit = (row: saleAttr) => {
+  row.flag = true
+  row.saleAttrValue = ''
+}
+const toLook = (row: saleAttr) => {
+  //整理收集属性id与属性值名字
+  const { baseSaleAttrId, saleAttrValue } = row
+  let newSaleAttrValue: SaleAttrValue = {
+    baseSaleAttrId,
+    saleAttrValueName: saleAttrValue as string,
+  }
+  //非法情况
+  if (saleAttrValue?.trim() == '') {
+    ElMessage({
+      type: 'error',
+      message: '属性值不能为空',
+    })
+    return
+  }
+  if (
+    row.spuSaleAttrValueList.find((item) => {
+      return item.saleAttrValueName == saleAttrValue
+    })
+  ) {
+    ElMessage({
+      type: 'error',
+      message: '属性值不能重复',
+    })
+    return
+  }
+  row.spuSaleAttrValueList.push(newSaleAttrValue)
+  row.flag = false
+}
+const save = async () => {
+  //处理照片器数据
+  SpuParams.value.spuImageList = imgList.value.map((item: any) => {
+    return {
+      imgName: item.name,
+      imgUrl: (item.response && item.response.data) || item.url,
+    }
+  })
+  //销售属性数据
+  SpuParams.value.spuSaleAttrList = saleAttrList.value
+  const result = await reqAddOrUpdateSpu(SpuParams.value)
+  if (result.code == 200) {
+    ElMessage({
+      type: 'success',
+      message: SpuParams.value.id ? '更新成功' : '添加成功',
+    })
+    $emit('changeScene', {
+      flag: 0,
+      params: SpuParams.value.id ? 'update' : 'add',
+    })
+  } else {
+    ElMessage({
+      type: 'error',
+      message: SpuParams.value.id ? '更新失败' : '添加失败',
+    })
+  }
+}
+//添加一个新的spu初始化
+const initAddSpu = async (c3Id: number | string) => {
+  //清空数据
+  Object.assign(SpuParams.value, {
+    id: '',
+    category3Id: '',
+    description: '',
+    spuName: '',
+    tmId: '',
+    spuImageList: [],
+    spuSaleAttrList: [],
+  })
+  imgList.value = []
+  saleAttrList.value = []
+  saleAttrAndValueName.value = ''
+  SpuParams.value.category3Id = c3Id
+  let result: AllTradeMark = await reqAllTradeMark()
+  let result1: HasSaleAttrResponseData = await reqAllSaleAttr()
+  AllTradeMarkList.value = result.data
+  allSaleAttr.value = result1.data
+}
+defineExpose({ initHasSpuData, initAddSpu })
 </script>
 
 <style scoped></style>

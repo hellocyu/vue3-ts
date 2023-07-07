@@ -107,11 +107,17 @@ const sizeChange = () => {
   getHasSpu()
 }
 const addSpu = () => {
+  spu.value.initAddSpu(categoryStore.c3Id)
   scene.value = 1
 }
 //子组件spuform绑定自定义事件
-const changeScene = (num: number) => {
-  scene.value = num
+const changeScene = (obj: any) => {
+  scene.value = obj.flag
+  if (obj.params == 'update') {
+    getHasSpu(pageNo.value)
+  } else {
+    getHasSpu()
+  }
 }
 
 const updateSpu = (row: SpuData) => {
