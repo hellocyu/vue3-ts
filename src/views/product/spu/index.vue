@@ -30,6 +30,7 @@
               size="small"
               icon="Plus"
               title="添加SKU"
+              @click="addSku(row)"
             ></el-button>
             <el-button
               type="primary"
@@ -65,7 +66,7 @@
       />
     </div>
     <SpuForm ref="spu" v-show="scene == 1" @changeScene="changeScene"></SpuForm>
-    <SkuForm v-show="scene == 2"></SkuForm>
+    <SkuForm ref="sku" v-show="scene == 2" @changeScene="changeScene"></SkuForm>
   </el-card>
 </template>
 
@@ -83,6 +84,7 @@ let pageSize = ref<number>(3)
 let total = ref<number>(0)
 let records = ref<Records>([])
 let spu = ref<any>()
+let sku = ref<any>()
 watch(
   () => categoryStore.c3Id,
   () => {
@@ -124,6 +126,10 @@ const updateSpu = (row: SpuData) => {
   //调用子组件实例方法获取完整已有spu数据
   spu.value.initHasSpuData(row)
   scene.value = 1
+}
+const addSku = (row: SpuData) => {
+  scene.value = 2
+  sku.value.initSkuData(categoryStore.c1Id, categoryStore.c2Id, row)
 }
 </script>
 
