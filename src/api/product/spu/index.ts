@@ -8,6 +8,7 @@ import {
   HasSaleAttrResponseData,
   SpuData,
   SkuData,
+  SkuInfoData,
 } from './type'
 enum API {
   HASSPU_URL = '/admin/product/ ',
@@ -18,6 +19,8 @@ enum API {
   ADDSPU_URL = '/admin/product/saveSpuInfo',
   UPDATESPU_URL = '/admin/product/updateSpuInfo',
   ADDSKU_URL = '/admin/product/saveSkuInfo',
+  SKUINFO_URL = '/admin/product/findBySpuId/',
+  REMOVESPU_URL = '/admin/product/deleteSpu/',
 }
 
 export const reqHasSpu = (
@@ -51,3 +54,8 @@ export const reqAddOrUpdateSpu = (data: SpuData) => {
 
 export const reqAddSku = (data: SkuData) =>
   request.post<any, any>(API.ADDSKU_URL, data)
+
+export const reqSkuList = (spuId: number | string) =>
+  request.get<any, SkuInfoData>(API.SKUINFO_URL + spuId)
+export const reqRemoveSpu = (spuId: number | string) =>
+  request.delete<any>(API.REMOVESPU_URL + spuId)
