@@ -43,8 +43,20 @@
             @click="updateSale(row)"
           ></el-button>
           <el-button type="primary" size="samll" icon="Edit"></el-button>
-          <el-button type="primary" size="samll" icon="InfoFilled"></el-button>
-          <el-button type="primary" size="samll" icon="Delete"></el-button>
+          <el-button
+            type="primary"
+            size="samll"
+            icon="InfoFilled"
+            @click="findSpu(row)"
+          ></el-button>
+          <el-popconfirm
+            :title="`你确定删除${row.skuName}?`"
+            @confirm="deleteSku(row.id)"
+          >
+            <template #reference>
+              <el-button type="primary" size="samll" icon="Delete"></el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -58,18 +70,82 @@
       :total="total"
       :background="true"
     ></el-pagination>
+    <el-drawer v-model="drawer">
+      <template #header>
+        <h4>查看商品详情</h4>
+      </template>
+      <template #default>
+        <el-row style="margin: 10px 0px">
+          <el-col :span="8">名称</el-col>
+          <el-col :span="16">{{ skuInfo.skuName }}</el-col>
+        </el-row>
+        <el-row style="margin: 10px 0px">
+          <el-col :span="8">描述</el-col>
+          <el-col :span="16">{{ skuInfo.skuDesc }}</el-col>
+        </el-row>
+        <el-row style="margin: 10px 0px">
+          <el-col :span="8">价格</el-col>
+          <el-col :span="16">{{ skuInfo.price }}</el-col>
+        </el-row>
+        <el-row style="margin: 10px 0px">
+          <el-col :span="8">平台属性</el-col>
+          <el-col :span="16">
+            <el-tag
+              v-for="(item, index) in skuInfo.skuAttrValueList"
+              :key="item.id"
+              style="margin: 5px"
+            >
+              {{ item.valueName }}
+            </el-tag>
+          </el-col>
+        </el-row>
+        <el-row style="margin: 10px 0px">
+          <el-col :span="8">销售属性</el-col>
+          <el-col :span="16">
+            <el-tag
+              v-for="(item, index) in skuInfo.skuSaleAttrValueList"
+              :key="item.id"
+              style="margin: 5px"
+            >
+              {{ item.saleAttrValueName }}
+            </el-tag>
+          </el-col>
+        </el-row>
+        <el-row style="margin: 10px 0px">
+          <el-col :span="8">商品图片</el-col>
+          <el-col :span="16">
+            <el-carousel :interval="4000" type="card" height="200px">
+              <el-carousel-item
+                v-for="item in skuInfo.skuImageList"
+                :key="item.id"
+              >
+                <img :src="item.imgUrl" style="width: 100%; height: 100%" />
+              </el-carousel-item>
+            </el-carousel>
+          </el-col>
+        </el-row>
+      </template>
+    </el-drawer>
   </el-card>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { reqSkuList, reqSaleSku, reqCancelSale } from '@/api/product/sku'
-import { SkuResponseData, SkuData } from '@/api/product/sku/type'
+import {
+  reqSkuList,
+  reqSaleSku,
+  reqCancelSale,
+  reqSkuInfo,
+  reqRemoveSku,
+} from '@/api/product/sku'
+import { SkuResponseData, SkuData, SkuInfoData } from '@/api/product/sku/type'
 import { ElMessage } from 'element-plus'
 let pageNo = ref<number>(1)
 let pageSize = ref<number>(10)
 let total = ref<number>(0)
 let skuArr = ref<SkuData[]>([])
+const drawer = ref<boolean>(false)
+let skuInfo = ref<any>({})
 onMounted(() => {
   getHasSku()
 })
@@ -101,6 +177,43 @@ const updateSale = async (row: SkuData) => {
   }
   getHasSku(pageNo.value)
 }
+const findSpu = async (row: SkuData) => {
+  drawer.value = true
+  let res: SkuInfoData = await reqSkuInfo(row.id)
+  skuInfo.value = res.data
+}
+const deleteSku = async (id: number) => {
+  let res: any = await reqRemoveSku(id)
+  if (res.code == 200) {
+    ElMessage({
+      type: 'success',
+      message: '删除成功',
+    })
+    // 获取剩余spu数据 若当前页只剩一条数据 则删除之后应跳转到上一页
+    getHasSku(skuArr.value.length > 1 ? pageNo.value : pageNo.value - 1)
+  } else {
+    ElMessage({
+      type: 'error',
+      message: '删除失败',
+    })
+  }
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.el-carousel__item h3 {
+  color: #475669;
+  opacity: 0.75;
+  line-height: 200px;
+  margin: 0;
+  text-align: center;
+}
+
+.el-carousel__item:nth-child(2n) {
+  background-color: #99a9bf;
+}
+
+.el-carousel__item:nth-child(2n + 1) {
+  background-color: #d3dce6;
+}
+</style>

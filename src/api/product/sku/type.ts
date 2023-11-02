@@ -4,22 +4,24 @@ export interface ResponseData {
   ok: boolean
 }
 export interface Attr {
+  id?: number
   attrId: string | number
   valueId: string | number
 }
 export interface SaleAttr {
+  id?: number
   saleAttrId: string | number
   saleAttrValueId: string | number
 }
 
 export interface SkuData {
-  category3Id: string | number
-  spuId: string | number
-  tmId: string | number
-  skuName: string
-  price: string | number
-  weight: string | number
-  skuDesc: string
+  category3Id?: string | number
+  spuId?: string | number
+  tmId?: string | number
+  skuName?: string
+  price?: string | number
+  weight?: string | number
+  skuDesc?: string
   skuAttrValueList?: Attr[]
   skuSaleAttrValueList?: SaleAttr[]
   skuDefaultImg: string
@@ -40,4 +42,8 @@ export interface SkuResponseData extends ResponseData {
     searchCount: boolean
     page: number
   }
+}
+// 获取sku商品详情接口的ts类型
+export interface SkuInfoData extends ResponseData {
+  data: SkuData
 }
