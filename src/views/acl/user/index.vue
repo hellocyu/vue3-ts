@@ -13,7 +13,7 @@
         >
           搜索
         </el-button>
-        <el-button type="primary" size="default">重置113</el-button>
+        <el-button type="primary" size="default" @click="reset">重置</el-button>
       </el-form-item>
     </el-form>
   </el-card>
@@ -178,6 +178,7 @@
 </template>
 
 <script setup lang="ts">
+import useLayoutSettingStore from '@/store/modules/setting'
 import { ref, onMounted, reactive, nextTick } from 'vue'
 import {
   reqUserInfo,
@@ -217,6 +218,8 @@ let userRole = ref<AllRole>([])
 //准备一个数组存储批量删除用户id
 let selectIdArr = ref<User[]>([])
 let keyWord = ref<string>('')
+//获取模板setting仓库
+let settingStore = useLayoutSettingStore()
 onMounted(() => {
   getHasUser()
 })
@@ -367,6 +370,9 @@ const deleteSelectUser = async () => {
 const search = () => {
   getHasUser()
   // keyWord.value = ''
+}
+const reset = () => {
+  settingStore.refresh = !settingStore.refresh
 }
 </script>
 

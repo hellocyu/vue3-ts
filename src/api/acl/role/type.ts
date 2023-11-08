@@ -1,10 +1,3 @@
-//登录接口需要携带参数ts类型
-export interface loginForm {
-  username: string
-  password: string
-}
-
-//定义全部接口返回数据拥有ts类型
 export interface ResponseData {
   code: number
   message: string
@@ -12,17 +5,39 @@ export interface ResponseData {
 }
 
 //定义登录接口返回数据类型
-export interface loginResponseData extends ResponseData {
-  data: string
+export interface RoleData {
+  id?: number
+  createTime?: string
+  updateTime?: string
+  roleName?: string
+  remark?: null
 }
-
-//定义用户信息返回数据类型
-export interface userResponseData extends ResponseData {
+export type Records = RoleData[]
+export interface RoleResponseData extends ResponseData {
   data: {
-    routes: string[]
-    buttons: string[]
-    roles: string[]
-    name: string
-    avatar: string
+    records: Records
+    total: number
+    size: number
+    current: number
+    pages: number
   }
+}
+//菜单与按钮数据类型
+export interface MenuData {
+  id: number
+  createTime?: string
+  updateTime?: string
+  pid: number
+  name: string
+  code: string
+  toCode: string
+  type: number
+  status: null
+  level: number
+  children?: MenuList
+  select: boolean
+}
+export type MenuList = MenuData[]
+export interface MenuResponseData extends ResponseData {
+  data: MenuList
 }
