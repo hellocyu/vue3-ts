@@ -2,11 +2,18 @@
   <el-card style="height: 80px">
     <el-form :inline="true" class="form">
       <el-form-item label="用户名：">
-        <el-input placeholder="请输入用户名"></el-input>
+        <el-input placeholder="请输入用户名" v-model="keyWord"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" size="default">搜索</el-button>
-        <el-button type="primary" size="default">重置</el-button>
+        <el-button
+          type="primary"
+          size="default"
+          :disabled="!keyWord"
+          @click="search"
+        >
+          搜索
+        </el-button>
+        <el-button type="primary" size="default">重置113</el-button>
       </el-form-item>
     </el-form>
   </el-card>
@@ -14,8 +21,21 @@
     <el-button type="primary" size="default" @click="addUser">
       添加用户
     </el-button>
-    <el-button type="primary" size="default">批量删除</el-button>
-    <el-table border stripe style="margin: 10px 0px" :data="userArr">
+    <el-button
+      type="primary"
+      size="default"
+      :disabled="selectIdArr.length ? false : true"
+      @click="deleteSelectUser"
+    >
+      批量删除
+    </el-button>
+    <el-table
+      border
+      stripe
+      style="margin: 10px 0px"
+      :data="userArr"
+      @selection-change="selectChange"
+    >
       <el-table-column type="selection" align="center"></el-table-column>
       <el-table-column label="#" align="center" type="index"></el-table-column>
       <el-table-column label="ID" align="center" prop="id"></el-table-column>
@@ -49,7 +69,12 @@
       ></el-table-column>
       <el-table-column label="操作" width="260px" align="center">
         <template #="{ row }">
-          <el-button type="primary" size="samll" icon="User"></el-button>
+          <el-button
+            type="primary"
+            size="samll"
+            icon="User"
+            @click="setRole(row)"
+          ></el-button>
           <el-button
             type="primary"
             size="samll"
@@ -57,8 +82,8 @@
             @click="updateUser(row)"
           ></el-button>
           <el-popconfirm
-            :title="`你确定删除${row.skuName}?`"
-            @confirm="deleteSku(row.id)"
+            :title="`你确定删除${row.username}?`"
+            @confirm="deleteUser(row.id)"
           >
             <template #reference>
               <el-button type="primary" size="samll" icon="Delete"></el-button>
@@ -106,8 +131,47 @@
     </template>
     <template #footer>
       <div style="flex: auto">
-        <el-button @click="cancelClick">取消</el-button>
+        <el-button @click="drawer = false">取消</el-button>
         <el-button type="primary" @click="confirmClick">确定</el-button>
+      </div>
+    </template>
+  </el-drawer>
+  <el-drawer v-model="drawer1">
+    <template #header>
+      <h4>分配用户角色</h4>
+    </template>
+    <template #default>
+      <el-form :model="userParams">
+        <el-form-item label="用户姓名" prop="username">
+          <el-input v-model="userParams.username" :disabled="true"></el-input>
+        </el-form-item>
+        <el-form-item label="角色列表" prop="name">
+          <el-checkbox
+            v-model="checkAll"
+            :indeterminate="isIndeterminate"
+            @change="handleCheckAllChange"
+          >
+            全选
+          </el-checkbox>
+          <el-checkbox-group
+            v-model="userRole"
+            @change="handleCheckedCitiesChange"
+          >
+            <el-checkbox
+              v-for="(item, index) in allRole"
+              :key="index"
+              :label="item"
+            >
+              {{ item.roleName }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+    </template>
+    <template #footer>
+      <div style="flex: auto">
+        <el-button @click="drawer1 = false">取消</el-button>
+        <el-button type="primary" @click="roleConfirmClick">确定</el-button>
       </div>
     </template>
   </el-drawer>
@@ -115,26 +179,54 @@
 
 <script setup lang="ts">
 import { ref, onMounted, reactive, nextTick } from 'vue'
-import { reqUserInfo, reqAddOrUpdateUser } from '@/api/acl/user'
-import { UserResponseData, Records, User } from '@/api/acl/user/type'
+import {
+  reqUserInfo,
+  reqAddOrUpdateUser,
+  reqAllRole,
+  reqSetUserRole,
+  reqRemoveUser,
+  reqSelectUser,
+} from '@/api/acl/user'
+import {
+  UserResponseData,
+  Records,
+  User,
+  AllRoleResponseData,
+  AllRole,
+  SetRoleData,
+} from '@/api/acl/user/type'
 import { ElMessage } from 'element-plus'
 let pageNo = ref<number>(1)
 let pageSize = ref<number>(5)
 let total = ref<number>(0)
 let userArr = ref<Records>([])
 let drawer = ref<boolean>(false)
+let drawer1 = ref<boolean>(false)
 let userParams = reactive<User>({
   username: '',
   name: '',
   password: '',
 })
 let formRef = ref<any>()
+let checkAll = ref<boolean>(false)
+//控制全选按钮不确定的样式
+let isIndeterminate = ref<boolean>(true)
+//存储全部职位的数据
+let allRole = ref<AllRole>([])
+let userRole = ref<AllRole>([])
+//准备一个数组存储批量删除用户id
+let selectIdArr = ref<User[]>([])
+let keyWord = ref<string>('')
 onMounted(() => {
   getHasUser()
 })
 const getHasUser = async (pager = 1) => {
   pageNo.value = pager
-  let res: UserResponseData = await reqUserInfo(pageNo.value, pageSize.value)
+  let res: UserResponseData = await reqUserInfo(
+    pageNo.value,
+    pageSize.value,
+    keyWord.value,
+  )
   if (res.code === 200) {
     total.value = res.data.total
     userArr.value = res.data.records
@@ -167,9 +259,6 @@ const updateUser = (row: User) => {
     formRef.value.clearValidate('username')
     formRef.value.clearValidate('name')
   })
-}
-const cancelClick = () => {
-  drawer.value = false
 }
 const confirmClick = async () => {
   await formRef.value.validate()
@@ -215,6 +304,69 @@ const rules = {
   username: [{ required: true, trigger: 'blur', validator: validatorUsername }],
   name: [{ required: true, trigger: 'blur', validator: validatorName }],
   password: [{ required: true, trigger: 'blur', validator: validatorPassword }],
+}
+const setRole = async (row: User) => {
+  //存储已有的用户信息
+  Object.assign(userParams, row)
+  let res: AllRoleResponseData = await reqAllRole(userParams.id)
+  if (res.code === 200) {
+    allRole.value = res.data.allRolesList
+    userRole.value = res.data.assignRoles
+  }
+  drawer1.value = true
+}
+const handleCheckAllChange = (val: boolean) => {
+  userRole.value = val ? allRole.value : []
+  isIndeterminate.value = false
+}
+const handleCheckedCitiesChange = (value: string[]) => {
+  const checkedCount = value.length
+  checkAll.value = checkedCount === allRole.value.length
+  isIndeterminate.value =
+    checkedCount > 0 && checkedCount < allRole.value.length
+}
+const roleConfirmClick = async () => {
+  let data: SetRoleData = {
+    userId: userParams.id,
+    roleIdList: userRole.value.map((item) => item.id),
+  }
+  let res = await reqSetUserRole(data)
+  if (res.code === 200) {
+    ElMessage({
+      type: 'success',
+      message: '分配职务成功',
+    })
+    drawer1.value = false
+    getHasUser(pageNo.value)
+  }
+}
+const deleteUser = async (userId: number) => {
+  let res: any = await reqRemoveUser(userId)
+  if (res.code === 200) {
+    ElMessage({
+      type: 'success',
+      message: '删除成功',
+    })
+    getHasUser(userArr.value.length > 1 ? pageNo.value : pageNo.value - 1)
+  }
+}
+const selectChange = (value: any) => {
+  selectIdArr.value = value
+}
+const deleteSelectUser = async () => {
+  let idList: any = selectIdArr.value.map((item) => item.id)
+  let res = await reqSelectUser(idList)
+  if (res.code === 200) {
+    ElMessage({
+      type: 'success',
+      message: '删除成功',
+    })
+    getHasUser(userArr.value.length > 1 ? pageNo.value : pageNo.value - 1)
+  }
+}
+const search = () => {
+  getHasUser()
+  // keyWord.value = ''
 }
 </script>
 

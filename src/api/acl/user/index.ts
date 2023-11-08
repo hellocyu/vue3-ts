@@ -1,15 +1,26 @@
 //统一管理项目用户相关的接口
 import request from '@/utils/request'
-import { UserResponseData, User } from './type'
+import {
+  UserResponseData,
+  User,
+  AllRoleResponseData,
+  SetRoleData,
+} from './type'
 //项目用户相关的请求地址
 enum API {
   ALLUSER_URL = '/admin/acl/user/',
   ADDUSER_URL = '/admin/acl/user/save',
   UPDATEUSER_URL = '/admin/acl/user/update',
+  ALLROLE_URL = '/admin/acl/user/toAssign/',
+  SETROLR_URL = '/admin/acl/user/doAssignRole',
+  DELETEUSER_URL = '/admin/acl/user/remove/',
+  DELETEALLUSER_URL = '/admin/acl/user/batchRemove',
 }
 
-export const reqUserInfo = (page: number, limit: number) =>
-  request.get<any, UserResponseData>(API.ALLUSER_URL + `${page}/${limit}`)
+export const reqUserInfo = (page: number, limit: number, username: string) =>
+  request.get<any, UserResponseData>(
+    API.ALLUSER_URL + `${page}/${limit}/?username=/${username}`,
+  )
 
 export const reqAddOrUpdateUser = (data: User) => {
   if (data.id) {
@@ -18,3 +29,14 @@ export const reqAddOrUpdateUser = (data: User) => {
     return request.post<any, any>(API.ADDUSER_URL, data)
   }
 }
+export const reqAllRole = (userId: number) =>
+  request.get<any, AllRoleResponseData>(API.ALLROLE_URL + userId)
+
+export const reqSetUserRole = (data: SetRoleData) =>
+  request.post<any, any>(API.SETROLR_URL, data)
+
+export const reqRemoveUser = (userId: number) =>
+  request.delete<any, any>(API.DELETEUSER_URL + userId)
+
+export const reqSelectUser = (idList: number[]) =>
+  request.delete<any, any>(API.DELETEALLUSER_URL, { data: idList })
