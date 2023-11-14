@@ -56,8 +56,8 @@
             @click="updateRole(row)"
           ></el-button>
           <el-popconfirm
-            :title="`你确定删除${row.username}?`"
-            @confirm="deleteUser(row.id)"
+            :title="`你确定删除${row.roleName}?`"
+            @confirm="deleteRole(row.id)"
           >
             <template #reference>
               <el-button type="primary" size="samll" icon="Delete"></el-button>
@@ -126,6 +126,7 @@ import {
   reqAddOrUpdateRole,
   reqAllMenuList,
   reqSetPermission,
+  reqRemoveRole,
 } from '@/api/acl/role'
 import {
   RoleResponseData,
@@ -231,9 +232,9 @@ const setPermission = async (row: RoleData) => {
     menuArr.value = res.data
     selectArr.value = filterSelectArr(menuArr.value, [])
     drawer.value = true
-    // 119
   }
 }
+//递归
 const filterSelectArr = (allData: any, initArr: any) => {
   allData.forEach((item: any) => {
     if (item.select && item.level === 4) {
@@ -257,9 +258,19 @@ const confirmClick = async () => {
     drawer.value = false
     ElMessage({
       type: 'success',
-      message: '分配成功120',
+      message: '分配成功',
     })
     window.location.reload()
+  }
+}
+const deleteRole = async (id: number) => {
+  let res: any = await reqRemoveRole(id)
+  if (res.code === 200) {
+    ElMessage({
+      type: 'success',
+      message: '删除成功',
+    })
+    getHasRole(allRole.value.length > 1 ? pageNo.value : pageNo.value - 1)
   }
 }
 </script>

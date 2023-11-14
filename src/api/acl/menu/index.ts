@@ -1,20 +1,22 @@
 //统一管理项目用户相关的接口
 import request from '@/utils/request'
-import { loginForm, loginResponseData, userResponseData } from './type'
+import { PermissionResponseData, MenuParams } from './type'
 //项目用户相关的请求地址
 enum API {
-  LOGIN_URL = '/admin/acl/index/login',
-  USERINFO_URL = '/admin/acl/index/info',
-  LOGOUT_URL = '/admin/acl/index/logout',
+  ALLPERMISSION_URL = '/admin/acl/permission',
+  ADDPERMISSION_URL = '/admin/acl/permission/save',
+  UPDATEPERMISSION_URL = '/admin/acl/permission/update',
+  DELETEMENU_URL = '/admin/acl/permission/remove/',
 }
+export const reqAllPermission = () =>
+  request.get<any, PermissionResponseData>(API.ALLPERMISSION_URL)
 
-//登录接口
-export const reqLogin = (data: loginForm) =>
-  request.post<any, loginResponseData>(API.LOGIN_URL, data)
-
-//获取用户信息接口
-export const reqUserInfo = () =>
-  request.get<any, userResponseData>(API.USERINFO_URL)
-
-//退出登录
-export const reqLogout = () => request.post<any, any>(API.LOGOUT_URL)
+export const reqAddOrUpdateMenu = (data: MenuParams) => {
+  if (data.id) {
+    return request.put<any, any>(API.UPDATEPERMISSION_URL, data)
+  } else {
+    return request.post<any, any>(API.ADDPERMISSION_URL, data)
+  }
+}
+export const reqRemoveMenu = (id: number) =>
+  request.delete<any, any>(API.DELETEMENU_URL + id)

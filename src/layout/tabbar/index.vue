@@ -25,12 +25,12 @@ export default {
   justify-content: space-between;
   width: 100%;
   height: 100%;
-  background-image: linear-gradient(
-    to right,
-    rgb(240, 231, 231),
-    rgb(240, 202, 202),
-    rgb(241, 223, 223)
-  );
+  // background-image: linear-gradient(
+  //   to right,
+  //   rgb(240, 231, 231),
+  //   rgb(240, 202, 202),
+  //   rgb(241, 223, 223)
+  // );
   .tabbar_left {
     display: flex;
     align-items: center;

@@ -11,6 +11,8 @@ import '@/styles/index.scss'
 import router from './router'
 import pinia from './store'
 import './permission'
+//暗黑模式
+import 'element-plus/theme-chalk/dark/css-vars.css'
 const app = createApp(App)
 app.use(ElementPlus)
 app.use(pinia)
