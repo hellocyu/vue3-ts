@@ -12,13 +12,40 @@
     <div class="number">
       <span v-for="(item, index) in people" :key="index">{{ item }}</span>
     </div>
-    <div class="charts">132个视频</div>
+    <div class="charts" ref="charts"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import * as echarts from 'echarts'
+import 'echarts-liquidfill'
 let people = ref('215908人')
+let charts = ref()
+onMounted(() => {
+  let myCharts = echarts.init(charts.value)
+  myCharts.setOption({
+    title: {
+      text: '水球图',
+    },
+    series: [
+      {
+        name: '销量',
+        type: 'liquidFill',
+        data: [0.6, 0.5, 0.4, 0.3],
+        color: ['skyblue', 'pink', 'green', 'blue'],
+        radius: '90%',
+      },
+    ],
+    //布局组件
+    // grid: {
+    //   left: 0,
+    //   right: 0,
+    //   top: 0,
+    //   bottom: 0,
+    // },
+  })
+})
 </script>
 
 <style lang="scss" scoped>
@@ -66,7 +93,6 @@ let people = ref('215908人')
   .charts {
     width: 100%;
     height: 240px;
-    background: red;
   }
 }
 </style>

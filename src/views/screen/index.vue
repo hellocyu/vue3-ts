@@ -10,7 +10,10 @@
           <Sex class="sex"></Sex>
           <Age class="age"></Age>
         </div>
-        <div class="center">中间</div>
+        <div class="center">
+          <Map class="map"></Map>
+          <Line class="line"></Line>
+        </div>
         <div class="right">右侧</div>
       </div>
     </div>
@@ -23,6 +26,8 @@ import Top from './components/top/index.vue'
 import Age from './components/age/index.vue'
 import Tourist from './components/tourist/index.vue'
 import Sex from './components/sex/index.vue'
+import Map from './components/map/index.vue'
+import Line from './components/line/index.vue'
 let screen = ref()
 onMounted(() => {
   screen.value.style.transform = `scale(${getScale()}) translate(-50%,-50%)`
@@ -80,6 +85,15 @@ window.onresize = () => {
     }
     .center {
       flex: 2;
+      display: flex;
+      flex-direction: column;
+      .map {
+        flex: 4;
+      }
+      .line {
+        flex: 1;
+        background: pink;
+      }
     }
   }
 }
