@@ -19,7 +19,6 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- <div class="charts" ref="charts"></div> -->
   </div>
 </template>
 
@@ -31,15 +30,9 @@ const data = [
   { id: 4, area: '万里长城', mount: 0.48 },
   { id: 5, area: '北京故宫', mount: 0.38 },
 ]
-import * as echarts from 'echarts'
 import { ref, onMounted } from 'vue'
-let charts = ref()
 let tableData = ref()
 onMounted(() => {
-  // let myCharts = echarts.init(charts.value)
-  // myCharts.setOption({
-  //   title: {},
-  // })
   getData()
 })
 const getData = () => {
@@ -66,6 +59,7 @@ const getData = () => {
 }
 :deep(.el-table thead) {
   font-weight: 900;
+  font-size: 16px;
 }
 :deep(
     .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell

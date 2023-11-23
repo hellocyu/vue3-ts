@@ -18,10 +18,46 @@ onMounted(() => {
     title: {},
     xAxis: {
       type: 'category',
-      // show: false,
+      boundaryGap: false,
+      data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: 'white',
+        },
+      },
     },
     yAxis: {
-      show: false,
+      type: 'value',
+      name: '(人数)',
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: 'white',
+        },
+      },
+      splitLine: {
+        show: false,
+      },
+    },
+    legend: {
+      data: ['2021年', '2022年', '2023年'],
+      right: '5%',
+      itemStyle: {
+        color: 'inherit',
+      },
+      textStyle: {
+        color: 'white',
+      },
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'line',
+        label: {
+          backgroundColor: '#6a7985',
+        },
+      },
     },
     grid: {
       top: 30,
@@ -29,15 +65,32 @@ onMounted(() => {
       right: 20,
       left: 30,
     },
-    series: {
-      type: 'scatter',
-      data: [33, 12, 45, 77],
-      symbol: 'arrow',
-      label: {
-        show: true,
-        position: 'top',
+    series: [
+      {
+        name: '2021年',
+        type: 'line',
+        data: [33, 12, 45, 77, 35, 90, 12, 55, 89, 24, 76, 14],
+        smooth: true,
+        showSymbol: false,
+        areaStyle: {},
       },
-    },
+      {
+        name: '2022年',
+        type: 'line',
+        showSymbol: false,
+        data: [13, 52, 85, 27, 55, 10, 72, 25, 19, 84, 36, 84],
+        smooth: true,
+        areaStyle: {},
+      },
+      {
+        name: '2023年',
+        type: 'line',
+        data: [63, 82, 15, 77, 5, 50, 82, 45, 39, 14, 46, 24],
+        smooth: true,
+        showSymbol: false,
+        areaStyle: {},
+      },
+    ],
   })
 })
 </script>

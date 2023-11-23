@@ -14,6 +14,9 @@ import './permission'
 //暗黑模式
 import 'element-plus/theme-chalk/dark/css-vars.css'
 const app = createApp(App)
+//引入自定义指令文件
+import { isHasButton } from '@/directive/has'
+isHasButton(app)
 app.use(ElementPlus)
 app.use(pinia)
 app.use(ElementPlus, {
