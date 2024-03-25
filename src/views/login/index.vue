@@ -56,7 +56,8 @@ let loading = ref(false)
 //收集账号与密码数据
 let loginForm = reactive({
   username: 'admin',
-  password: 'atguigu123',
+  // password: 'atguigu123',
+  password: '111111',
 })
 const validateUserName = (rule: any, value: any, callback: any) => {
   // rule: 即为校验规则对象  value: 即为表单元素文本内容  callback:函数，如果符合条件callback放行，如果不符合条件callback条件，注入错误信息
